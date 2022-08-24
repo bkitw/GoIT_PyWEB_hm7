@@ -5,22 +5,32 @@ def main():
     hostname = socket.gethostname()
     host = socket.gethostbyname(hostname)
     port = 5000
-    print(f'Server\'s IP: {host}, port: {port}\nWaiting for client.')
+    print(f'Server starting from {host}; {port}.\nWaiting for client...')
     server_socket = socket.socket()
     server_socket.bind((host, port))
-    server_socket.listen(2)
-    conn, address = server_socket.accept()
-    data = conn.recv(100).decode()
+    server_socket.listen(3)
+    try:
+        conn, address = server_socket.accept()
+        print(f'Got connection from {address}!')
+        message = 'Hello there!'
+        while message.lower().strip() != 'break':
+            print('Now wait for message from client...')
+            data = conn.recv(100).decode()
 
-    if not data:
-        print('Got nothing.')
-    print('Client send a message:')
-    print(f'|{data}|')
+            if not data:
+                print('--- Client preferred to dismiss the connection. ---')
+                break
 
-    conn.send('OK'.encode())
+            print(f'Client send a message:\n|{data}|')
 
-    conn.close()
-
+            message = input('---> ')
+            conn.send(message.encode())
+        print('--- Server is closed manually. ---')
+        server_socket.close()
+        conn.close()
+    except KeyboardInterrupt:
+        print('--- Connection interrupted manually! ---')
+        server_socket.close()
 
 
 if __name__ == '__main__':
